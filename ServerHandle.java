@@ -90,6 +90,9 @@ public class ServerHandle extends Thread{
 			try {
 				out = new ObjectOutputStream( clientSocket.getOutputStream());
 				in = new ObjectInputStream( clientSocket.getInputStream());
+				
+				out.writeObject(new SchatMessage("Server","Your user name has been set to " + userName));
+				out.flush();
 			} catch (IOException e) {
 				System.err.println("Could not open socket in/out.");
 			}
