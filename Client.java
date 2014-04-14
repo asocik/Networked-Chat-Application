@@ -10,6 +10,7 @@ import java.io.*;
 import java.net.*;
 import java.util.Scanner;
 import java.util.Vector;
+
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
@@ -17,23 +18,23 @@ public class Client implements Runnable
 {
    	private Socket socket;
 	private Vector<String> currentUsers;
-	private PrintWriter out;
-	private Scanner in;
-   	
-	public Client(chatGUI gui)
+	private ObjectOutputStream out = null;
+    private ObjectInputStream in = null;
+   	private CchatMessage messageToServer;
+   	private abstractMessage messageFromServer;
+    
+	public Client(int port)
 	{
-		// How should we get these
-		int port = 0;
 		String host = "client";		// Host name
-		
 		
 		// Connect to server
 		try 
 		{
 			socket = new Socket(host, port);
-			out = new PrintWriter(socket.getOutputStream());
+			out = new ObjectOutputStream(socket.getOutputStream());
+			in = new ObjectInputStream(socket.getInputStream());
 			// out.println();	// Print the username to notify the server
-			out.flush();
+			//out.flush();
 			
 			// Add username to current users
 			// currentUsers.add();
@@ -58,15 +59,20 @@ public class Client implements Runnable
 		{
 			try 
 			{
+				/*
 				in = new Scanner(socket.getInputStream());
 				out = new PrintWriter(socket.getOutputStream());
 				out.flush();
-				
+				*/
 				while(true)
 				{
-					if (in.hasNext())	// Receive a message
+					messageFromServer = (abstractMessage) in.readObject();
+					
+					if (messageFromServer.getType() == abstractMessage.MESSAGETYPE.SCHAT)	// Receive a message
 					{
-						String message = in.nextLine();
+						SchatMessage tempMessage = (SchatMessage) messageFromServer;
+						System.out.println(tempMessage.getBody());
+				
 						
 						/*
 						 * If the message contains a command like "!@#" then
@@ -86,6 +92,8 @@ public class Client implements Runnable
 						 */
 					}
 				}	
+			} catch (ClassNotFoundException e) {
+				//abstract class not found
 			} 
 			finally
 			{
@@ -118,23 +126,12 @@ public class Client implements Runnable
 	 * Sends a message to the server
 	 * 
 	 * @param message 
+	 * @throws IOException 
 	 */
-	public void send(String message)
+	public void send(String message) throws IOException
 	{
 		// out.println(username + ": " + message);
 		out.flush();
-	}
-	
-	/**
-	 * Main makes the calls to set up the GUI and the client
-	 * 
-	 * @param args
-	 */
-	public static void main(String[] args)
-	{
-		chatGUI gui = new chatGUI();
-		gui.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
-		new Client(gui);		//Create new chat client
 	}
 }
 
