@@ -44,7 +44,7 @@ public class ServerHandle extends Thread{
 	}
 	
 	public void run(){
-		System.out.println("Running thread");
+		System.out.println("Running server thread");
 		while(serverContinue){
 			try {
 				serverSocket.setSoTimeout(10000);
@@ -59,7 +59,7 @@ public class ServerHandle extends Thread{
 				System.out.println("Added user" + toAdd.getUserName());
 				
 			} catch(SocketTimeoutException ste){
-				System.out.println("Socket timed out...");
+				System.out.println("Socket accept user timed out...");
 			} catch (SocketException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -105,9 +105,11 @@ public class ServerHandle extends Thread{
 				//check socket
 				try {
 					abstractMessage message = (abstractMessage) in.readObject();
-					
+					System.out.println("Got a message!");
 					if(message.getType() == abstractMessage.MESSAGETYPE.CCHAT){
-						sendMessagesToWorker((CchatMessage) message);
+						CchatMessage tempMessage = (CchatMessage) message;
+						System.out.println("Got a CCHAT message with body: " + tempMessage.getBody());
+						sendMessagesToWorker(tempMessage);
 					}
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
@@ -125,6 +127,7 @@ public class ServerHandle extends Thread{
 			if(MSG.getTo().equals("0")){
 				//to everyone
 				for(clientThread e : clientThreads){
+					System.out.println("Sending " + MSG.getBody() + " to " + e.getUserName());
 					worker.JobQueue.add(new Job(new SchatMessage(e.getUserName(),MSG.getBody()),
 							this.getUserName()));
 				}//for each

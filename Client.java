@@ -14,7 +14,7 @@ import java.util.Vector;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
-public class Client implements Runnable
+public class Client extends Thread
 {
    	private Socket socket;
 	private Vector<String> currentUsers;
@@ -25,7 +25,7 @@ public class Client implements Runnable
     
 	public Client(int port)
 	{
-		String host = "client";		// Host name
+		String host = "127.0.0.1";		// Host name
 		
 		// Connect to server
 		try 
@@ -39,8 +39,8 @@ public class Client implements Runnable
 			// Add username to current users
 			// currentUsers.add();
 			
-			Thread thread = new Thread();
-			thread.start();
+			//Thread thread = new Thread();
+			this.start();
 		} 
 		catch (IOException e) 
 		{
@@ -64,6 +64,7 @@ public class Client implements Runnable
 				out = new PrintWriter(socket.getOutputStream());
 				out.flush();
 				*/
+				
 				while(true)
 				{
 					messageFromServer = (abstractMessage) in.readObject();
@@ -71,9 +72,12 @@ public class Client implements Runnable
 					if (messageFromServer.getType() == abstractMessage.MESSAGETYPE.SCHAT)	// Receive a message
 					{
 						SchatMessage tempMessage = (SchatMessage) messageFromServer;
+						System.out.println("client got Message");
 						System.out.println(tempMessage.getBody());
 				
-						
+						System.out.println("sending hello");
+						out.writeObject(new CchatMessage("0","Hello world?"));
+						out.flush();
 						/*
 						 * If the message contains a command like "!@#" then
 						 * there is a new user that needs to be added to the current users.
