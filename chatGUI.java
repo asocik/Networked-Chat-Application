@@ -112,10 +112,6 @@ public class chatGUI extends JFrame implements ActionListener{
 
 
 		revalidate();//change the window
-
-
-
-
 	}
 
 
@@ -177,9 +173,6 @@ public class chatGUI extends JFrame implements ActionListener{
 
 			System.out.println(userName);
 		}
-
-
-
 	}
 
 
@@ -380,7 +373,8 @@ public class chatGUI extends JFrame implements ActionListener{
 		else if(e.getSource() == clientSend)
 		{
 			String message = clientMessageArea.getText();
-
+			//chatArea.append(message + "\n");
+			
 			try 
 			{
 				client.send(message);
