@@ -100,6 +100,9 @@ public class ServerHandle extends Thread{
 		public void run(){
 			System.out.println("Starting user thread for " + userName);
 			
+			//send out the name of everyone
+			announceUsers();
+			
 			while(true){
 				//check socket
 				try {
@@ -117,6 +120,7 @@ public class ServerHandle extends Thread{
 						e1.printStackTrace();
 					}
 					clientThreads.remove(this);
+					announceUsers();
 					break;
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
@@ -132,11 +136,23 @@ public class ServerHandle extends Thread{
 			
 		}
 		
+		private void announceUsers(){
+			String allUsers = new String();
+			//gather all names
+			for(clientThread t : clientThreads){
+				allUsers += t.getUserName() + "\n";
+			}
+			//send out the messages
+			for(clientThread t : clientThreads){
+				worker.JobQueue.add(new Job(new RespMessage(allUsers),t.getUserName()));
+			}
+		}
+		
 		private void sendMessagesToWorker(CchatMessage MSG){
 			if(MSG.getTo().equals("0")){
 				//to everyone
 				for(clientThread e : clientThreads){
-					System.out.println("Sending " + MSG.getBody() + " to " + e.getUserName());
+					System.out.println("Sending <<" + MSG.getBody() + ">> to <<" + e.getUserName() + ">>");
 					worker.JobQueue.add(new Job(new SchatMessage(e.getUserName(),MSG.getBody()),
 							this.getUserName()));
 				}//for each
@@ -162,13 +178,13 @@ public class ServerHandle extends Thread{
 				Job working = JobQueue.poll();
 				if(working != null){
 					if(working.getType() == JOBTYPE.MSG){
-						sendMessage((SchatMessage) working.getMSG(), working.getTo());
+						sendMessage(working.getMSG(), working.getTo());
 					}
 				}
 			}//while
 		}
 		
-		public void sendMessage(SchatMessage MSG,String to){
+		public void sendMessage(abstractMessage MSG,String to){
 			clientThread sendTo = null;
 			
 			for( clientThread t : clientThreads){
@@ -190,10 +206,10 @@ public class ServerHandle extends Thread{
 		}
 	}
 	
-	private class Job{
-		private JOBTYPE type;
-		private abstractMessage message;
-		private String to;
+	private final class Job{
+		private final JOBTYPE type;
+		private final abstractMessage message;
+		private final String to;
 		
 		public Job(abstractMessage MSG,String sendto){
 			type = JOBTYPE.MSG;
