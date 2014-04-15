@@ -18,7 +18,7 @@ public class ServerHandle extends Thread{
 	private int userCounter; // an implicit naming convention
 	private boolean serverContinue;
 	private WorkerThread worker;
-	private ConcurrentHashMap<String,clientThread> nameToClient;
+	//private ConcurrentHashMap<String,clientThread> nameToClient;
 	public enum JOBTYPE{ //for job class
 		MSG //send message
 	}
@@ -33,7 +33,7 @@ public class ServerHandle extends Thread{
 			System.exit(-1);
 		}
 		clientThreads = new Vector<clientThread>();
-		nameToClient = new ConcurrentHashMap<String,clientThread>();
+		//nameToClient = new ConcurrentHashMap<String,clientThread>();
 		
 		worker = new WorkerThread();
 		worker.start();
@@ -50,9 +50,10 @@ public class ServerHandle extends Thread{
 				serverSocket.setSoTimeout(10000);
 				Socket addSocket = serverSocket.accept(); // blocking read
 				userCounter++;
-				clientThread toAdd = new clientThread(addSocket, Integer.toString(userCounter),worker);
+				String addUserName = "User" + Integer.toString(userCounter);
+				clientThread toAdd = new clientThread(addSocket, addUserName ,worker);
 				clientThreads.add(toAdd);
-				nameToClient.put(toAdd.getUserName(),toAdd);//add userName to lookup
+				//nameToClient.put(toAdd.getUserName(),toAdd);//add userName to lookup
 				toAdd.start();
 				
 
