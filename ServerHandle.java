@@ -153,8 +153,8 @@ public class ServerHandle extends Thread{
 				//to everyone
 				for(clientThread e : clientThreads){
 					System.out.println("Sending <<" + MSG.getBody() + ">> to <<" + e.getUserName() + ">>");
-					worker.JobQueue.add(new Job(new SchatMessage(e.getUserName(),MSG.getBody()),
-							this.getUserName()));
+					worker.JobQueue.add(new Job(new SchatMessage(this.getUserName(),MSG.getBody()),
+							e.getUserName()));
 				}//for each
 			}
 		}
