@@ -117,6 +117,7 @@ public class ServerHandle extends Thread{
 						e1.printStackTrace();
 					}
 					clientThreads.remove(this);
+					break;
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -125,6 +126,8 @@ public class ServerHandle extends Thread{
 					e.printStackTrace();
 				}
 			}
+			
+			System.out.println("Thread is dying for " + userName);
 			
 			
 		}
