@@ -160,12 +160,13 @@ public class ServerHandle extends Thread{
 		}
 		
 		public void sendMessage(SchatMessage MSG,String to){
-			clientThread sendTo;
-			if(nameToClient.contains(to)){
-				sendTo = nameToClient.get(to);
-			}else{
-				System.out.println("No user " + to);
-				return;
+			clientThread sendTo = null;
+			
+			for( clientThread t : clientThreads){
+				if(t.getUserName().equals(to)){
+					sendTo = t;
+					break;
+				}
 			}
 			
 			try {
@@ -174,6 +175,8 @@ public class ServerHandle extends Thread{
 			} catch (IOException e) {
 				System.out.println("unable to send message");
 				System.exit(-1);
+			} catch(NullPointerException e){
+				System.out.println("No User "+to);
 			}
 		}
 	}
