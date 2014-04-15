@@ -116,7 +116,7 @@ public class Client extends Thread
 	 * @param message 
 	 * @throws IOException 
 	 */
-	public void send(String message) throws IOException
+	public void send(String msg) throws IOException
 	{
 		String to = "0";
 		String body = null;
@@ -128,7 +128,7 @@ public class Client extends Thread
 		}
 		else
 		{
-			body = gui.getCurrentLine().getText();
+			body = msg;
 		}
 			
 		out.writeObject(new CchatMessage(to,body));

@@ -2,7 +2,9 @@ import java.awt.*;
 
 import javax.swing.*;
 import javax.swing.border.*;
+
 import java.awt.event.*;
+import java.io.IOException;
 import java.util.Random;
 
 
@@ -43,7 +45,8 @@ public class chatGUI extends JFrame implements ActionListener{
 	private JPanel connectionPanel;
 	private String privateMessagePeople=null;
 	private String privateMessageContent=null;
-
+	private Client client;
+	private ServerHandle server;
 
 
 
@@ -324,14 +327,14 @@ public class chatGUI extends JFrame implements ActionListener{
 		if(e.getSource() == serverButton){
 
 			setServerGUI();
-
+			server = new ServerHandle(0);
 		}
 
 		//if client button is pressed,  start GUI for client portion
 		else if(e.getSource() == clientButton){
 
 			setClientGUI();
-
+			
 		}
 
 		//if using as server,  after connnect has been pressed,
@@ -356,19 +359,37 @@ public class chatGUI extends JFrame implements ActionListener{
 
 		//connect as a client
 		else if(e.getSource() == clientConnect){
-
+			serverPort = Integer.parseInt(userName);
+			
+			client = new Client(serverPort, this);
 		}
 
 		//disconnect as a client
 		else if(e.getSource() == clientDisconnect){
-
+			try 
+			{
+				client.disconnect();
+			} 
+			catch (IOException e1) 
+			{
+				e1.printStackTrace();
+			}
 		}
 
 		//send a message as a client
-		else if(e.getSource() == clientSend){
+		else if(e.getSource() == clientSend)
+		{
 			String message = clientMessageArea.getText();
-			chatArea.append(message + "\n");
 
+			try 
+			{
+				client.send(message);
+			} 
+			catch (IOException e1)
+			{
+				e1.printStackTrace();
+			}
+			
 		}
 
 		//private message as a client
@@ -418,5 +439,10 @@ public class chatGUI extends JFrame implements ActionListener{
 		}
 
 	}
-
+	
+	public static void main(String[] args)
+	{
+		chatGUI gui = new chatGUI();
+		gui.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
+	}
 }
