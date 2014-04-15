@@ -124,9 +124,19 @@ public class Client extends Thread
 	 */
 	public void send(String message) throws IOException
 	{
-		// Needs work for private messages
+		String to = "0";
+		String body = null;
 		
-		out.writeObject(new CchatMessage("0","Hello world?"));
+		if (gui.getPrivateMessagePoeple() != null)
+		{
+			to = gui.getPrivateMessagePoeple();
+			body = gui.getPrivateMessageContents();
+		}
+		
+		// Still have to get message from none private message
+		
+		
+		out.writeObject(new CchatMessage(to,body));
 		out.flush();
 	}
 }

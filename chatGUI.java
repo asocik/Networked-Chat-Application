@@ -2,11 +2,10 @@ import java.awt.*;
 
 import javax.swing.*;
 import javax.swing.border.*;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
-
 import java.awt.event.*;
 import java.util.Random;
+import java.util.ArrayList;
+import java.util.StringTokenizer;
 
 /**************************
  * 
@@ -43,6 +42,8 @@ public class chatGUI extends JFrame implements ActionListener{
 	private JTextArea chatArea;
 	private JScrollPane chatAreaScroll;
 	private JPanel connectionPanel;
+	private String privateMessagePeople=null;
+	private String privateMessageContent=null;
 
 
 
@@ -311,6 +312,18 @@ public class chatGUI extends JFrame implements ActionListener{
 		return clientMessageArea;
 	}
 
+	public String getPrivateMessagePoeple(){
+		String tempPeople = privateMessagePeople;
+		privateMessagePeople=null;
+		return tempPeople;
+	}
+
+	public String getPrivateMessageContents(){
+		String tempMessage = privateMessageContent;
+		privateMessageContent = null;
+		return tempMessage;
+	}
+
 	/*****************
 	 * This method allows for interaction when buttons are pressed
 	 */
@@ -400,8 +413,8 @@ public class chatGUI extends JFrame implements ActionListener{
 							"Enter your message and recipients",
 							JOptionPane.OK_CANCEL_OPTION);
 			if(check == JOptionPane.OK_OPTION){
-				System.out.println(people.getText());
-				System.out.println(message.getText());
+				privateMessagePeople=people.getText();
+				privateMessageContent=message.getText();
 			}
 
 
