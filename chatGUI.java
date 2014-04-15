@@ -6,309 +6,418 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
 import java.awt.event.*;
+import java.util.Random;
 
-
+/**************************
+ * 
+ * @author Ryan Szymkiewicz
+ *  written for CS 342, Spring 2014 Project 4
+ *  
+ *  The purpose of this file is to provide the GUI for our networked
+ *  chat application.  There are options for both a server and client GUI
+ *  that can be selected when the program is started.
+ *
+ */
 @SuppressWarnings("serial")
 public class chatGUI extends JFrame implements ActionListener{
-	
+
+	//these class variables will be used throughout the file.
+	//they will be described as they are used
+
 	private JButton serverButton, clientButton;
 	private JLabel welcomeLabel;
-	private JPanel firstPanel, serverPanel, clientPanel;
-	private JButton serverConnect, serverDisconnect,serverExit;
-	private JPanel serverButtonPanel;
-	private JPanel serverConnects;
-	private JPanel serverChatWindow;
-	private JPanel serverContainer;
-	private JLabel connectLabel,chatLabel;
-	private JTextField serverTextArea;
+	private JPanel firstPanel, clientPanel;
 	private JButton clientConnect, clientDisconnect, clientExit;
 	private JPanel clientButtonPanel;
-	private JPanel clientConnects;
-	private JPanel clientChatWindow;
-	private JPanel clientContainer;
-	private JTextField clientTextArea;
-	private JButton serverMultipleMessages;
+	private JTextArea clientMessageArea;
 	private JButton clientMultipleMessages;
-	
-	
-	
-	
-	
+	private JButton serverConnect;
+	private JPanel serverPanel;
+	private JTextField portTextField;
+	private int serverPort;
+	private JPanel serverInfoPanel;
+	private JPanel textContainer;
+	private JButton clientSend;
+	private String userName=null;
+	private JPanel chatContainer;
+	private JTextArea chatArea;
+	private JScrollPane chatAreaScroll;
+	private JPanel connectionPanel;
+
+
+
+
+	/*******************
+	 * The chatGUI method is used when starting the program.  
+	 * It allows the user to select if they are a client or server
+	 */
 	public chatGUI(){
-		
+
+		//set title of window
 		super("Chat Client");
-		setSize(1000,750);
-		
-		firstPanel = new JPanel();
-		
+		setSize(200,100);//set initial window size
+
+		firstPanel = new JPanel();//create the first panel
+
+		//ask if the user is a server or client
 		firstPanel.setLayout(new FlowLayout());
 		welcomeLabel = new JLabel("Are you a server or client? ");
 		serverButton = new JButton("Server");
 		serverButton.addActionListener(this);
 		clientButton = new JButton("Client");
 		clientButton.addActionListener(this);
-		
-		
+
+
 		firstPanel.add(welcomeLabel);
 		firstPanel.add(serverButton);
 		firstPanel.add(clientButton);
-		
-		add(firstPanel);
-		
-		
-		
-		
-		
-		
+
+		add(firstPanel);//add the panel
+
 		setVisible(true);
 	}
-	
+
+	/*******************
+	 * The setServerGUI method is used if the user indicates that they are a 
+	 * server.  This allows the user to "select" a port and displays that
+	 * information
+	 */
 	private void setServerGUI(){
-		
-		remove(firstPanel);
-		
-		serverPanel=new JPanel(new BorderLayout());
+
+		remove(firstPanel);//remove the first panel
+
+		setSize(300,200);//set a new size
+
+		//initialize the new panel
+		serverPanel = new JPanel(new GridLayout(3,1));
 		add(serverPanel);
-		
+
+		JLabel serverWelcome = new JLabel("Enter the port you will connect to");
+		serverPanel.add(serverWelcome,SwingConstants.CENTER);
+
+		//show the port being connected to.  currently set to 0(default)
+		portTextField = new JTextField();
+		portTextField.setEditable(false);
+		portTextField.setText("0");
+		serverPanel.add(portTextField);
+
+		//connect button....this will bring up a new screen if clicked
 		serverConnect = new JButton("Connect");
 		serverConnect.addActionListener(this);
-		serverDisconnect = new JButton("Disconnect");
-		serverDisconnect.addActionListener(this);
-		serverExit = new JButton("Exit");
-		serverExit.addActionListener(this);
-		serverMultipleMessages = new JButton("Private Message");
-		serverMultipleMessages.addActionListener(this);
-		
-		serverButtonPanel = new JPanel();
-		serverButtonPanel.add(serverConnect);
-		serverButtonPanel.add(serverDisconnect);
-		serverButtonPanel.add(serverExit);
-		serverButtonPanel.add(serverMultipleMessages);
-		
-		serverPanel.add(serverButtonPanel, BorderLayout.NORTH);
-		
-		serverContainer = new JPanel(new GridBagLayout());
-		GridBagConstraints c = new GridBagConstraints();
-		
-		serverConnects = new JPanel();
-		Border connectBorder = BorderFactory.createLineBorder(Color.black);
-		serverConnects.setBorder(connectBorder);
-		serverConnects.setBackground(Color.WHITE);
-		c.gridx=0;
-		c.gridy=1;
-		c.weightx=0.1;
-		c.ipady=600;
-		c.ipadx=200;
-		
-		
-		
-		serverContainer.add(serverConnects,c);
-		
-		connectLabel = new JLabel("Connections");
-		c.gridx=0;
-		c.gridy=0;
-		c.ipady=0;
-		c.ipadx=0;
-		serverContainer.add(connectLabel,c);
-		
-		serverChatWindow = new JPanel();
-		Border chatBorder = BorderFactory.createLineBorder(Color.black);
-		serverChatWindow.setBorder(chatBorder);
-		serverChatWindow.setBackground(Color.WHITE);
-		c.gridx=1;
-		c.gridy=1;
-		c.ipadx=700;
-		c.ipady=600;
-		serverContainer.add(serverChatWindow,c);
-		
-		chatLabel = new JLabel("Chat");
-		c.gridx=1;
-		c.gridy=0;
-		c.ipadx=0;
-		c.ipady=0;
-		serverContainer.add(chatLabel,c);
-		
-		serverPanel.add(serverContainer);
-		
-		
+		serverPanel.add(serverConnect);
 
-		
-		
-		
-		serverTextArea = new JTextField();
-		serverTextArea.addActionListener(this);
-		serverPanel.add(serverTextArea,BorderLayout.SOUTH);
-		
-		
-		revalidate();
-		
-		
-		
-		
+
+
+		revalidate();//change the window
+
+
+
+
 	}
-	
+
+
+	/***************************
+	 * The setUsername method sets the username for a client based
+	 * on what they have entered or generates a random username if 
+	 * they do not select one
+	 */
+	private void setUsername(){
+
+
+		//initilize the labels and panel,  add the items
+		JLabel nameLabel = new JLabel("Enter your username");
+		JTextField nameEnter = new JTextField();
+		JPanel namePanel = new JPanel(new GridLayout(2,1));
+		namePanel.add(nameLabel);
+		namePanel.add(nameEnter);
+
+
+
+		//use JOptionPane to get the username with an "OK-Cancel" popup
+		int option =
+				JOptionPane.showConfirmDialog(
+						null,
+						namePanel,
+						"Enter your username",
+						JOptionPane.OK_CANCEL_OPTION);
+
+		String tUserName = nameEnter.getText();//temporarily set the username
+
+		if(option == JOptionPane.OK_OPTION && !tUserName.isEmpty()){
+
+			userName = tUserName;//if user pressed OK and field is valid,  set name
+
+			System.out.print(userName);
+
+		}
+
+		//if the user pressed cancel or did not enter a name,
+		//generate a random username
+		else if(option == JOptionPane.CANCEL_OPTION || tUserName.isEmpty()){
+
+			int num1,num2,num3;
+
+			//three random integers from 0-99 are obtained.
+			//There is an extremely small chance that two users could
+			//have the same name,  but since this chat should not use more than
+			//~5 clients,  the risk is very low.
+			Random generator = new Random();
+			num1 = generator.nextInt(99);
+			num2 = generator.nextInt(99);
+			num3 = generator.nextInt(99);
+
+			//set the username with User followed by the 3 numbers
+			userName = "User"+
+					Integer.toString(num1)+
+					Integer.toString(num2)+
+					Integer.toString(num3);
+
+			System.out.println(userName);
+		}
+
+
+
+	}
+
+
+	/**********************
+	 * setCLientGUI sets up and displays the GUI for a client
+	 * The functionality will be described below
+	 */
 	private void setClientGUI(){
-		
-		remove(firstPanel);
-		
+
+
+
+		remove(firstPanel);//remove first panel
+
+		setSize(1000,750);//set new size
+
+		setUsername();//set username if client
+
+		//clientPanel is a container for all other panels in this method
 		clientPanel=new JPanel(new BorderLayout());
 		add(clientPanel);
-		
+
+		//set up buttons that will line the top of the client panel
+		//these buttons are set up with action listeners so that they
+		//respond when clicked
 		clientConnect = new JButton("Connect");
 		clientConnect.addActionListener(this);
 		clientDisconnect = new JButton("Disconnect");
 		clientDisconnect.addActionListener(this);
 		clientExit = new JButton("Exit");
 		clientExit.addActionListener(this);
-		
+		clientMultipleMessages = new JButton("Private Message");
+		clientMultipleMessages.addActionListener(this);
+
+		//intialize and add a JPanel that contains the  buttons
 		clientButtonPanel = new JPanel();
 		clientButtonPanel.add(clientConnect);
 		clientButtonPanel.add(clientDisconnect);
 		clientButtonPanel.add(clientExit);
-		
+		clientButtonPanel.add(clientMultipleMessages);
+
+		//add the panel to the top of the container panel
 		clientPanel.add(clientButtonPanel, BorderLayout.NORTH);
-		
-		clientContainer = new JPanel(new GridBagLayout());
-		GridBagConstraints c = new GridBagConstraints();
-		
-		clientConnects = new JPanel();
-		Border connectBorder = BorderFactory.createLineBorder(Color.black);
-		clientConnects.setBorder(connectBorder);
-		clientConnects.setBackground(Color.WHITE);
-		c.gridx=0;
-		c.gridy=1;
-		c.weightx=0.1;
-		c.ipady=600;
-		c.ipadx=200;
-		
-		
-		
-		clientContainer.add(clientConnects,c);
-		
-		connectLabel = new JLabel("Connections");
-		c.gridx=0;
-		c.gridy=0;
-		c.ipady=0;
-		c.ipadx=0;
-		clientContainer.add(connectLabel,c);
-		
-		clientChatWindow = new JPanel();
-		Border chatBorder = BorderFactory.createLineBorder(Color.black);
-		clientChatWindow.setBorder(chatBorder);
-		clientChatWindow.setBackground(Color.WHITE);
-		c.gridx=1;
-		c.gridy=1;
-		c.ipadx=700;
-		c.ipady=600;
-		clientContainer.add(clientChatWindow,c);
-		
-		chatLabel = new JLabel("Chat");
-		c.gridx=1;
-		c.gridy=0;
-		c.ipadx=0;
-		c.ipady=0;
-		clientContainer.add(chatLabel,c);
-		
-		clientPanel.add(clientContainer);
-		
-		clientTextArea = new JTextField();
-		clientTextArea.addActionListener(this);
-		clientPanel.add(clientTextArea,BorderLayout.SOUTH);
-		
-		
-		
-		
+
+
+		//set up a new JPanel that will be in the middle of the page
+		//add some padding around the panel as a border
+		chatContainer = new JPanel(new BorderLayout());
+		Border panelBorder = 
+				BorderFactory.createEmptyBorder(30,30,30,30);
+		chatContainer.setBorder(panelBorder);
+
+		//create a new text area on the right side of the page
+		chatArea = new JTextArea(5,55);
+		chatArea.setEditable(false);
+
+		//add a scroll pane to that text area
+		chatAreaScroll = new JScrollPane (chatArea);
+
+		//set the scroll pane so that the scroll bars are visible 
+		//so the user knows they are there
+        chatAreaScroll.setVerticalScrollBarPolicy 
+                          (ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+        chatAreaScroll.setHorizontalScrollBarPolicy 
+        				(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
+        //set border that indicates this is a chat window
+		Border chatAreaBorder = BorderFactory.createTitledBorder("Chat Window");
+		chatAreaScroll.setBorder(chatAreaBorder);
+
+		//create a new JPanel to keep track of current connections
+		connectionPanel = new JPanel();
+		connectionPanel.setPreferredSize(new Dimension(225,100));
+		//create a border to display what this is
+		Border connectionPanelBorder = 
+				BorderFactory.createTitledBorder("Chat Connections");
+		connectionPanel.setBorder(connectionPanelBorder);
+		connectionPanel.setBackground(Color.WHITE);
+
+
+		//add the components to the container panel
+		chatContainer.add(chatAreaScroll,BorderLayout.EAST);
+		chatContainer.add(connectionPanel,BorderLayout.WEST);
+		clientPanel.add(chatContainer);
+
+
+		//set up a new panel that will be used to enter messages
+		//and send them to the server for display
+		textContainer = new JPanel(new BorderLayout());
+
+		//create text area where messages will be typed
+		clientMessageArea = new JTextArea();
+		Border messageBorder = BorderFactory.createLineBorder(Color.black);
+		clientMessageArea.setBorder(messageBorder);
+		clientMessageArea.setText("Type Here");
+
+		//add this to the page
+		textContainer.add(clientMessageArea,BorderLayout.CENTER);
+
+		//create a send button to send message off
+		clientSend = new JButton("Send");
+		clientSend.addActionListener(this);
+		textContainer.add(clientSend,BorderLayout.EAST);
+
+		//add to the window
+		clientPanel.add(textContainer,BorderLayout.SOUTH);
+
 		revalidate();
-		
+
 	}
-	
+
+	/*****************
+	 * These getters are used by the server and client
+	 * portions of the program
+	 * 
+	 */
+	public int getServerPort(){
+		return serverPort;
+	}
+
+	public JPanel getConnectWindow(){
+		return connectionPanel;
+	}
+
+	public JTextArea getChatWindow(){
+		return chatArea;
+	}
+
+	public String getUsername(){
+		return userName;
+	}
+
+	public JTextArea getCurrentLine(){
+		return clientMessageArea;
+	}
+
+	/*****************
+	 * This method allows for interaction when buttons are pressed
+	 */
 	public void actionPerformed(ActionEvent e) {
-		
+
+		//if server button is pressed,  start GUI for server portion
 		if(e.getSource() == serverButton){
-			
+
 			setServerGUI();
-			
+
 		}
-		
+
+		//if client button is pressed,  start GUI for client portion
 		else if(e.getSource() == clientButton){
-			
+
 			setClientGUI();
-			
+
 		}
-		
-		else if(e.getSource() == serverExit){
-			System.exit(0);
-		}
+
+		//if using as server,  after connnect has been pressed,
+		//set the port to the class variable and switch panels
+		//that displays the port
 		else if(e.getSource() == serverConnect){
-			String port=(String)
-				JOptionPane.showInputDialog("What port do you want to use?");
-			
-			System.out.println(port);
+			String tempPort = portTextField.getText();
+			serverPort = Integer.parseInt(tempPort);
+			remove(serverPanel);
+			serverInfoPanel = new JPanel();
+			add(serverInfoPanel);
+			JLabel info = new JLabel("You are connected to port: "+tempPort);
+			serverInfoPanel.add(info);
+			System.out.println(serverPort);
+			revalidate();
 		}
-		else if(e.getSource() == serverDisconnect){
-			
-		}
+
+		//exit the window
 		else if(e.getSource() == clientExit){
 			System.exit(0);
 		}
+
+		//connect as a client
 		else if(e.getSource() == clientConnect){
-			String port=(String)
-					JOptionPane.showInputDialog("What port do you want to use?");
-			System.out.println(port);
+
 		}
+
+		//disconnect as a client
 		else if(e.getSource() == clientDisconnect){
-			
+
 		}
-		else if(e.getSource() == serverTextArea){
-			String line = serverTextArea.getText();
-			System.out.println(line);
-			serverTextArea.setText(null);
+
+		//send a message as a client
+		else if(e.getSource() == clientSend){
+
+
 		}
-		else if(e.getSource() == clientTextArea){
-			String line = clientTextArea.getText();
-			System.out.println(line);
-			clientTextArea.setText(null);
-			
-		}
-		else if(e.getSource() == serverMultipleMessages){
+
+		//private message as a client
+		//this code was modified from ideas found at:
+		//http://stackoverflow.com/questions/6555040/
+		//multiple-input-in-joptionpane-showinputdialog
+		//The fields are initialized as JTextFields that are placed into
+		//a JPanel
+		//This panel has a gridLayout and the previous fields are added to the
+		//panel.  Then JOptionPane is passed this panel and a 
+		//window with the fields and "Cancel" and "OK" appears.
+		//If text is entered and OK is pressed,  a private message should be sent
+		//this code was modified from the original source
+		//through the different text areas that are needed and the way
+		//that the panel was set up.
+		else if(e.getSource() == clientMultipleMessages){
 			JTextField people = new JTextField(25);
 			JTextField message = new JTextField(50);
 			JLabel peopleLabel = new JLabel("Enter the people you wish to \n"
 					+ "chat with separated with a space\n.");
 			JLabel messageLabel = new JLabel("Enter your message \n");
-			
+
 			JPanel privateMessagePanel = new JPanel(new GridLayout(4,1));
 			privateMessagePanel.add(peopleLabel);
 			privateMessagePanel.add(people);
-			
+
 			privateMessagePanel.add(messageLabel);
 			privateMessagePanel.add(message);
-			
-			int result =
+
+			int check =
 					JOptionPane.showConfirmDialog(
 							null,
 							privateMessagePanel,
 							"Enter your message and recipients",
 							JOptionPane.OK_CANCEL_OPTION);
-			if(result == JOptionPane.OK_OPTION){
+			if(check == JOptionPane.OK_OPTION){
 				System.out.println(people.getText());
 				System.out.println(message.getText());
 			}
-					
-			
-			
-					
+
+
+
+
 		}
 		else{
 			System.out.println("Problem with button press");
 		}
-		
+
 	}
 
-	
-	
-	
-	
-	
-	
+
+
+
+
+
+
 }

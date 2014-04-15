@@ -8,29 +8,25 @@
  * ------------------------------------------------------------------------*/
 import java.io.*;
 import java.net.*;
-import java.util.Scanner;
-import java.util.Vector;
-
-import javax.swing.JFrame;
+import javax.swing.*;
 import javax.swing.JOptionPane;
 
 public class Client extends Thread
 {
    	private Socket socket;
-	private Vector<String> currentUsers;
 	private ObjectOutputStream out = null;
     private ObjectInputStream in = null;
-   	private CchatMessage messageToServer;
-   	private abstractMessage messageFromServer;
+   	private abstractMessage message;
+   	private chatGUI gui;
     
-	public Client(int port)
+	public Client(int port, chatGUI gui)
 	{
-		String host = "127.0.0.1";		// Host name
+		this.gui = gui;
 		
 		// Connect to server
 		try 
 		{
-			socket = new Socket(host, port);
+			socket = new Socket("127.0.0.1", port);
 			out = new ObjectOutputStream(socket.getOutputStream());
 			in = new ObjectInputStream(socket.getInputStream());
 			// out.println();	// Print the username to notify the server
@@ -39,7 +35,6 @@ public class Client extends Thread
 			// Add username to current users
 			// currentUsers.add();
 			
-			//Thread thread = new Thread();
 			this.start();
 		} 
 		catch (IOException e) 
@@ -55,59 +50,54 @@ public class Client extends Thread
 	@Override
 	public void run() 
 	{
-		try
+		
+		while(true)
 		{
 			try 
 			{
-				/*
-				in = new Scanner(socket.getInputStream());
-				out = new PrintWriter(socket.getOutputStream());
-				out.flush();
-				*/
+				message = (abstractMessage) in.readObject();
 				
-				while(true)
+				// Receive message from the server and output to GUI
+				if (message.getType() == abstractMessage.MESSAGETYPE.SCHAT)	 
 				{
-					messageFromServer = (abstractMessage) in.readObject();
-					
-					if (messageFromServer.getType() == abstractMessage.MESSAGETYPE.SCHAT)	// Receive a message
-					{
-						SchatMessage tempMessage = (SchatMessage) messageFromServer;
-						System.out.println("client got Message");
-						System.out.println(tempMessage.getBody());
+					SchatMessage serverMessage = (SchatMessage) message;
+					gui.getChatWindow().append(serverMessage.getFrom() + ": " + serverMessage.getBody() + "\n");
+				}
 				
-						System.out.println("sending hello");
-						out.writeObject(new CchatMessage("0","Hello world?"));
-						out.flush();
-						/*
-						 * If the message contains a command like "!@#" then
-						 * there is a new user that needs to be added to the current users.
-						 * This is just an idea, we can talk about it later
-						 
-						 if (message.contains("!@#")
-						 {
-						 	parse the message for the new user
-						 	add to the user list
-						 	update the gui
-						 }
-						 else	// Regular message
-						 {
-						 	print the message to the GUI
-						 }
-						 */
-					}
-				}	
-			} catch (ClassNotFoundException e) {
-				//abstract class not found
+				// Send username to the server
+				else if (message.getType() == abstractMessage.MESSAGETYPE.CALLME) 
+				{
+					String userName = gui.getUsername();
+					//out.writeObject(new CallMeMessage(userName));
+				}
+				
+				// Booted by the server
+				else if (message.getType() == abstractMessage.MESSAGETYPE.DEAD)	
+				{
+					disconnect();
+				}
+				
+				// Update the list of users
+				else if (message.getType() == abstractMessage.MESSAGETYPE.RESP) 
+				{
+					
+					StringBuilder builder = new StringBuilder();
+					
+					/*
+						Loop over RESP String
+							builder.append(username + "\n")
+							
+						gui.getConnectWindow().add(new JLabel(builder.toString()));
+						
+					*/	
+				}
+				
 			} 
-			finally
+			catch (ClassNotFoundException | IOException e) 
 			{
-				socket.close();
+				e.printStackTrace();
 			}
-		}
-		catch (IOException e) 
-		{
-			// Print error
-		}
+		}	
 	}
 	
 	/**
@@ -117,7 +107,7 @@ public class Client extends Thread
 	 */
 	public void disconnect() throws IOException
 	{
-		//out.println(username + "has disconnected.");
+		// out.writeObject(new ByeMessage());
 		out.flush();
 		socket.close();
 		in.close();
@@ -134,7 +124,9 @@ public class Client extends Thread
 	 */
 	public void send(String message) throws IOException
 	{
-		// out.println(username + ": " + message);
+		// Needs work for private messages
+		
+		out.writeObject(new CchatMessage("0","Hello world?"));
 		out.flush();
 	}
 }
