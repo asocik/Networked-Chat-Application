@@ -1,3 +1,4 @@
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -6,7 +7,6 @@ import java.net.Socket;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.util.Vector;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 
@@ -18,7 +18,6 @@ public class ServerHandle extends Thread{
 	private int userCounter; // an implicit naming convention
 	private boolean serverContinue;
 	private WorkerThread worker;
-	//private ConcurrentHashMap<String,clientThread> nameToClient;
 	public enum JOBTYPE{ //for job class
 		MSG //send message
 	}
@@ -27,13 +26,12 @@ public class ServerHandle extends Thread{
 		try {
 			serverSocket = new ServerSocket(port);
 			portNum = serverSocket.getLocalPort();
-			System.out.println("Listening on port" + portNum);
+			System.out.println("Listening on port# " + portNum);
 		} catch (IOException e) {
 			System.err.println("Could not listen on port" + port);
 			System.exit(-1);
 		}
 		clientThreads = new Vector<clientThread>();
-		//nameToClient = new ConcurrentHashMap<String,clientThread>();
 		
 		worker = new WorkerThread();
 		worker.start();
@@ -92,7 +90,7 @@ public class ServerHandle extends Thread{
 				out = new ObjectOutputStream( clientSocket.getOutputStream());
 				in = new ObjectInputStream( clientSocket.getInputStream());
 				
-				out.writeObject(new SchatMessage("Server","Your user name has been set to " + userName));
+				worker.JobQueue.add(new Job(new SchatMessage("Server","Your user name has been set to " + userName), userName));
 				out.flush();
 			} catch (IOException e) {
 				System.err.println("Could not open socket in/out.");
@@ -106,12 +104,19 @@ public class ServerHandle extends Thread{
 				//check socket
 				try {
 					abstractMessage message = (abstractMessage) in.readObject();
-					System.out.println("Got a message!");
 					if(message.getType() == abstractMessage.MESSAGETYPE.CCHAT){
 						CchatMessage tempMessage = (CchatMessage) message;
-						System.out.println("Got a CCHAT message with body: " + tempMessage.getBody());
 						sendMessagesToWorker(tempMessage);
 					}
+				} catch(EOFException e){
+					try {
+						out.close();
+						in.close();
+					} catch (IOException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+					clientThreads.remove(this);
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -174,10 +179,10 @@ public class ServerHandle extends Thread{
 				sendTo.out.writeObject(MSG);
 				sendTo.out.flush();
 			} catch (IOException e) {
-				System.out.println("unable to send message");
+				System.out.println("Unable to send message");
 				System.exit(-1);
 			} catch(NullPointerException e){
-				System.out.println("No User "+to);
+				System.out.println("No User " + to);
 			}
 		}
 	}
@@ -193,17 +198,14 @@ public class ServerHandle extends Thread{
 			to = sendto;
 		}
 		
-		public JOBTYPE getType(){
-			return type;
-		}
+		public JOBTYPE getType()
+		{ return type; }
 		
-		public abstractMessage getMSG(){
-			return message;
-		}
+		public abstractMessage getMSG()
+		{ return message; }
 		
-		public String getTo(){
-			return to;
-		}
+		public String getTo()
+		{ return to; }
 	}
 
 }
