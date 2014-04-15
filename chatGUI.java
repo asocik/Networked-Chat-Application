@@ -4,8 +4,7 @@ import javax.swing.*;
 import javax.swing.border.*;
 import java.awt.event.*;
 import java.util.Random;
-import java.util.ArrayList;
-import java.util.StringTokenizer;
+
 
 /**************************
  * 
@@ -235,14 +234,6 @@ public class chatGUI extends JFrame implements ActionListener{
 
 		//add a scroll pane to that text area
 		chatAreaScroll = new JScrollPane (chatArea);
-
-		//set the scroll pane so that the scroll bars are visible 
-		//so the user knows they are there
-        chatAreaScroll.setVerticalScrollBarPolicy 
-                          (ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
-        chatAreaScroll.setHorizontalScrollBarPolicy 
-        				(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
-        //set border that indicates this is a chat window
 		Border chatAreaBorder = BorderFactory.createTitledBorder("Chat Window");
 		chatAreaScroll.setBorder(chatAreaBorder);
 
@@ -375,7 +366,8 @@ public class chatGUI extends JFrame implements ActionListener{
 
 		//send a message as a client
 		else if(e.getSource() == clientSend){
-
+			String message = clientMessageArea.getText();
+			chatArea.append(message + "\n");
 
 		}
 
@@ -426,11 +418,5 @@ public class chatGUI extends JFrame implements ActionListener{
 		}
 
 	}
-
-
-
-
-
-
 
 }

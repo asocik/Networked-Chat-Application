@@ -8,7 +8,6 @@
  * ------------------------------------------------------------------------*/
 import java.io.*;
 import java.net.*;
-import javax.swing.*;
 import javax.swing.JOptionPane;
 
 public class Client extends Thread
@@ -29,12 +28,7 @@ public class Client extends Thread
 			socket = new Socket("127.0.0.1", port);
 			out = new ObjectOutputStream(socket.getOutputStream());
 			in = new ObjectInputStream(socket.getInputStream());
-			// out.println();	// Print the username to notify the server
-			//out.flush();
-			
-			// Add username to current users
-			// currentUsers.add();
-			
+						
 			this.start();
 		} 
 		catch (IOException e) 
@@ -132,10 +126,11 @@ public class Client extends Thread
 			to = gui.getPrivateMessagePoeple();
 			body = gui.getPrivateMessageContents();
 		}
-		
-		// Still have to get message from none private message
-		
-		
+		else
+		{
+			body = gui.getCurrentLine().getText();
+		}
+			
 		out.writeObject(new CchatMessage(to,body));
 		out.flush();
 	}
