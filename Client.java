@@ -8,6 +8,8 @@
  * ------------------------------------------------------------------------*/
 import java.io.*;
 import java.net.*;
+
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 
 public class Client extends Thread
@@ -28,7 +30,8 @@ public class Client extends Thread
 			socket = new Socket("127.0.0.1", port);
 			out = new ObjectOutputStream(socket.getOutputStream());
 			in = new ObjectInputStream(socket.getInputStream());
-						
+			// send call me		
+			
 			this.start();
 		} 
 		catch (IOException e) 
@@ -44,7 +47,6 @@ public class Client extends Thread
 	@Override
 	public void run() 
 	{
-		
 		while(true)
 		{
 			try 
@@ -84,6 +86,9 @@ public class Client extends Thread
 						gui.getConnectWindow().add(new JLabel(builder.toString()));
 						
 					*/	
+					RespMessage msg = (RespMessage) message;
+					System.out.println(msg.getPayload());
+					gui.getConnectWindow().add(new JLabel(msg.getPayload()));
 				}
 				
 			} 
@@ -102,10 +107,7 @@ public class Client extends Thread
 	public void disconnect() throws IOException
 	{
 		// out.writeObject(new ByeMessage());
-		out.flush();
-		socket.close();
-		in.close();
-		out.close();
+
 		JOptionPane.showMessageDialog(null, "You disconnected from the server");
 		System.exit(0);
 	}

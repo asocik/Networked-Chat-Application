@@ -47,6 +47,8 @@ public class chatGUI extends JFrame implements ActionListener{
 	private String privateMessageContent=null;
 	private Client client;
 	private ServerHandle server;
+	private int clientPort;
+	private String clientPortString;
 
 
 
@@ -100,7 +102,6 @@ public class chatGUI extends JFrame implements ActionListener{
 
 		//show the port being connected to.  currently set to 0(default)
 		portTextField = new JTextField();
-		portTextField.setEditable(false);
 		portTextField.setText("0");
 		serverPanel.add(portTextField);
 
@@ -126,9 +127,13 @@ public class chatGUI extends JFrame implements ActionListener{
 		//initilize the labels and panel,  add the items
 		JLabel nameLabel = new JLabel("Enter your username");
 		JTextField nameEnter = new JTextField();
-		JPanel namePanel = new JPanel(new GridLayout(2,1));
+		JLabel portLabel = new JLabel("Enter the port");
+		JTextField portEnter = new JTextField();
+		JPanel namePanel = new JPanel(new GridLayout(4,1));
 		namePanel.add(nameLabel);
 		namePanel.add(nameEnter);
+		namePanel.add(portLabel);
+		namePanel.add(portEnter);
 
 
 
@@ -137,16 +142,20 @@ public class chatGUI extends JFrame implements ActionListener{
 				JOptionPane.showConfirmDialog(
 						null,
 						namePanel,
-						"Enter your username",
+						"Enter your username and port",
 						JOptionPane.OK_CANCEL_OPTION);
 
 		String tUserName = nameEnter.getText();//temporarily set the username
+		String tPort = portEnter.getText();//get temporary port
 
-		if(option == JOptionPane.OK_OPTION && !tUserName.isEmpty()){
+		if(option == JOptionPane.OK_OPTION && !tUserName.isEmpty() &&
+				!tPort.isEmpty()){
 
 			userName = tUserName;//if user pressed OK and field is valid,  set name
+			clientPort = Integer.parseInt(tPort);//set port
 
 			System.out.print(userName);
+			System.out.print(clientPort);
 
 		}
 
@@ -172,6 +181,10 @@ public class chatGUI extends JFrame implements ActionListener{
 					Integer.toString(num3);
 
 			System.out.println(userName);
+		}
+		else if(tPort.isEmpty()){
+			JOptionPane.showMessageDialog(this,"Port Not Selected.  Quitting");
+			System.exit(0);
 		}
 	}
 
@@ -320,28 +333,29 @@ public class chatGUI extends JFrame implements ActionListener{
 		if(e.getSource() == serverButton){
 
 			setServerGUI();
-			server = new ServerHandle(0);
+			
 		}
 
 		//if client button is pressed,  start GUI for client portion
 		else if(e.getSource() == clientButton){
 
 			setClientGUI();
-			
+
 		}
 
 		//if using as server,  after connnect has been pressed,
 		//set the port to the class variable and switch panels
 		//that displays the port
 		else if(e.getSource() == serverConnect){
+			server = new ServerHandle(0);
 			String tempPort = portTextField.getText();
 			serverPort = Integer.parseInt(tempPort);
 			remove(serverPanel);
 			serverInfoPanel = new JPanel();
 			add(serverInfoPanel);
-			JLabel info = new JLabel("You are connected to port: "+tempPort);
+			JLabel info = new JLabel("You are connected to port: "+ server.getPort());
 			serverInfoPanel.add(info);
-			System.out.println(serverPort);
+			System.out.println(server.getPort());
 			revalidate();
 		}
 
@@ -352,9 +366,9 @@ public class chatGUI extends JFrame implements ActionListener{
 
 		//connect as a client
 		else if(e.getSource() == clientConnect){
-			serverPort = Integer.parseInt(userName);
-			
-			client = new Client(serverPort, this);
+			client = new Client(clientPort, this);
+
+
 		}
 
 		//disconnect as a client
@@ -374,7 +388,7 @@ public class chatGUI extends JFrame implements ActionListener{
 		{
 			String message = clientMessageArea.getText();
 			//chatArea.append(message + "\n");
-			
+
 			try 
 			{
 				client.send(message);
@@ -383,7 +397,7 @@ public class chatGUI extends JFrame implements ActionListener{
 			{
 				e1.printStackTrace();
 			}
-			
+
 		}
 
 		//private message as a client
@@ -433,7 +447,7 @@ public class chatGUI extends JFrame implements ActionListener{
 		}
 
 	}
-	
+
 	public static void main(String[] args)
 	{
 		chatGUI gui = new chatGUI();
