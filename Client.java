@@ -8,7 +8,6 @@
  * ------------------------------------------------------------------------*/
 import java.io.*;
 import java.net.*;
-
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 
@@ -129,9 +128,7 @@ public class Client extends Thread
 			body = gui.getPrivateMessageContents();
 		}
 		else
-		{
 			body = msg;
-		}
 			
 		out.writeObject(new CchatMessage(to,body));
 		out.flush();

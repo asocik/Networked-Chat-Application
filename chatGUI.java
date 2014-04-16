@@ -78,7 +78,7 @@ public class chatGUI extends JFrame implements ActionListener{
 		firstPanel.add(clientButton);
 
 		add(firstPanel);//add the panel
-
+		setLocationRelativeTo(null);
 		setVisible(true);
 	}
 
@@ -110,8 +110,6 @@ public class chatGUI extends JFrame implements ActionListener{
 		serverConnect.addActionListener(this);
 		serverPanel.add(serverConnect);
 
-
-
 		revalidate();//change the window
 	}
 
@@ -121,9 +119,8 @@ public class chatGUI extends JFrame implements ActionListener{
 	 * on what they have entered or generates a random username if 
 	 * they do not select one
 	 */
-	private void setUsername(){
-
-
+	private void setUsername()
+	{
 		//initilize the labels and panel,  add the items
 		JLabel nameLabel = new JLabel("Enter your username");
 		JTextField nameEnter = new JTextField();
@@ -134,8 +131,6 @@ public class chatGUI extends JFrame implements ActionListener{
 		namePanel.add(nameEnter);
 		namePanel.add(portLabel);
 		namePanel.add(portEnter);
-
-
 
 		//use JOptionPane to get the username with an "OK-Cancel" popup
 		int option =
@@ -193,14 +188,12 @@ public class chatGUI extends JFrame implements ActionListener{
 	 * setCLientGUI sets up and displays the GUI for a client
 	 * The functionality will be described below
 	 */
-	private void setClientGUI(){
-
-
-
+	private void setClientGUI()
+	{
 		remove(firstPanel);//remove first panel
 
 		setSize(1000,750);//set new size
-
+		setLocationRelativeTo(null);
 		setUsername();//set username if client
 
 		//clientPanel is a container for all other panels in this method
@@ -261,7 +254,6 @@ public class chatGUI extends JFrame implements ActionListener{
 		chatContainer.add(connectionPanel,BorderLayout.WEST);
 		clientPanel.add(chatContainer);
 
-
 		//set up a new panel that will be used to enter messages
 		//and send them to the server for display
 		textContainer = new JPanel(new BorderLayout());
@@ -284,7 +276,6 @@ public class chatGUI extends JFrame implements ActionListener{
 		clientPanel.add(textContainer,BorderLayout.SOUTH);
 
 		revalidate();
-
 	}
 
 	/*****************
@@ -367,8 +358,6 @@ public class chatGUI extends JFrame implements ActionListener{
 		//connect as a client
 		else if(e.getSource() == clientConnect){
 			client = new Client(clientPort, this);
-
-
 		}
 
 		//disconnect as a client
@@ -392,12 +381,12 @@ public class chatGUI extends JFrame implements ActionListener{
 			try 
 			{
 				client.send(message);
+				clientMessageArea.setText("");	// Clears out old text
 			} 
 			catch (IOException e1)
 			{
 				e1.printStackTrace();
 			}
-
 		}
 
 		//private message as a client
@@ -437,10 +426,6 @@ public class chatGUI extends JFrame implements ActionListener{
 				privateMessagePeople=people.getText();
 				privateMessageContent=message.getText();
 			}
-
-
-
-
 		}
 		else{
 			System.out.println("Problem with button press");
