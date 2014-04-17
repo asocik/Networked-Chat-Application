@@ -110,7 +110,8 @@ public class chatGUI extends JFrame implements ActionListener{
 		serverConnect.addActionListener(this);
 		serverPanel.add(serverConnect);
 
-		revalidate();//change the window
+		validate();//change the window
+		repaint();
 	}
 
 
@@ -275,7 +276,8 @@ public class chatGUI extends JFrame implements ActionListener{
 		//add to the window
 		clientPanel.add(textContainer,BorderLayout.SOUTH);
 
-		revalidate();
+		validate();//change the window
+		repaint();
 	}
 
 	/*****************
@@ -347,7 +349,8 @@ public class chatGUI extends JFrame implements ActionListener{
 			JLabel info = new JLabel("You are connected to port: "+ server.getPort());
 			serverInfoPanel.add(info);
 			System.out.println(server.getPort());
-			revalidate();
+			validate();//change the window
+			repaint();
 		}
 
 		//exit the window

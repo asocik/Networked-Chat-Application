@@ -77,17 +77,13 @@ public class Client extends Thread
 				{
 					
 					StringBuilder builder = new StringBuilder();
-					
-					/*
-						Loop over RESP String
-							builder.append(username + "\n")
-							
-						gui.getConnectWindow().add(new JLabel(builder.toString()));
-						
-					*/	
+
 					RespMessage msg = (RespMessage) message;
 					System.out.println(msg.getPayload());
+					gui.getConnectWindow().removeAll();
 					gui.getConnectWindow().add(new JLabel(msg.getPayload()));
+					gui.validate();
+					gui.repaint();
 				}
 				
 			} 

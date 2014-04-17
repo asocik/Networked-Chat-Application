@@ -80,6 +80,7 @@ public class ServerHandle extends Thread{
 		public ObjectOutputStream out;
 		private ObjectInputStream in;
 		private WorkerThread worker;
+		private Object Namelock = new Object();
 		
 		public clientThread(Socket r, String name, WorkerThread worker){
 			clientSocket = r;
@@ -137,14 +138,19 @@ public class ServerHandle extends Thread{
 		}
 		
 		private void announceUsers(){
-			String allUsers = new String();
 			//gather all names
-			for(clientThread t : clientThreads){
-				allUsers += t.getUserName() + "\n";
-			}
-			//send out the messages
-			for(clientThread t : clientThreads){
-				worker.JobQueue.add(new Job(new RespMessage(allUsers),t.getUserName()));
+			synchronized(Namelock){
+				String allUsers = new String();
+				
+				for(clientThread t : clientThreads){
+					allUsers += t.getUserName() + "\n";
+				}
+			
+				//send out the messages
+				for(clientThread t : clientThreads){
+					worker.JobQueue.add(new Job(new RespMessage(allUsers),t.getUserName()));
+					System.out.println("Sending <<" + allUsers + ">> to <<"+t.getUserName()+">>");
+				}
 			}
 		}
 		
@@ -160,7 +166,15 @@ public class ServerHandle extends Thread{
 		}
 		
 		public String getUserName(){
-			return userName;
+			synchronized(Namelock){
+				return userName;
+			}
+		}
+		
+		public void changeUserName(String newUser){
+			synchronized(Namelock){
+				userName = newUser;
+			}
 		}
 	}
 	
@@ -211,6 +225,11 @@ public class ServerHandle extends Thread{
 		private final abstractMessage message;
 		private final String to;
 		
+		/**
+		 * 
+		 * @param MSG The message to send out
+		 * @param sendto The recipient of the message
+		 */
 		public Job(abstractMessage MSG,String sendto){
 			type = JOBTYPE.MSG;
 			message = MSG;
