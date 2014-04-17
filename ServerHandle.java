@@ -65,6 +65,9 @@ public class ServerHandle extends Thread{
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
+			} catch (ClassNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
 			
 		}//while
@@ -82,7 +85,8 @@ public class ServerHandle extends Thread{
 		private WorkerThread worker;
 		private Object Namelock = new Object();
 		
-		public clientThread(Socket r, String name, WorkerThread worker){
+		public clientThread(Socket r, String name, WorkerThread worker) throws ClassNotFoundException
+		{
 			clientSocket = r;
 			this.userName = name;
 			this.worker = worker;
@@ -90,6 +94,14 @@ public class ServerHandle extends Thread{
 			try {
 				out = new ObjectOutputStream( clientSocket.getOutputStream());
 				in = new ObjectInputStream( clientSocket.getInputStream());
+				
+				
+				
+				
+				abstractMessage message = (abstractMessage) in.readObject();
+				CallMe msg = (CallMe) message;
+				
+				userName = msg.getName();
 				
 				worker.JobQueue.add(new Job(new SchatMessage("Server","Your user name has been set to " + userName), userName));
 				out.flush();
@@ -104,7 +116,8 @@ public class ServerHandle extends Thread{
 			//send out the name of everyone
 			announceUsers();
 			
-			while(true){
+			while(true)
+			{
 				//check socket
 				try {
 					abstractMessage message = (abstractMessage) in.readObject();
@@ -133,19 +146,19 @@ public class ServerHandle extends Thread{
 			}
 			
 			System.out.println("Thread is dying for " + userName);
-			
-			
 		}
 		
 		private void announceUsers(){
 			//gather all names
 			synchronized(Namelock){
-				String allUsers = new String();
 				
+				// Use HTML to add newline characters for JLable 
+				String allUsers = new String("<html>");
 				for(clientThread t : clientThreads){
-					allUsers += t.getUserName() + "\n";
+					allUsers += t.getUserName() + "<br>";
 				}
-			
+				allUsers+="</html>";
+				
 				//send out the messages
 				for(clientThread t : clientThreads){
 					worker.JobQueue.add(new Job(new RespMessage(allUsers),t.getUserName()));

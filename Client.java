@@ -8,6 +8,7 @@
  * ------------------------------------------------------------------------*/
 import java.io.*;
 import java.net.*;
+
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 
@@ -28,8 +29,7 @@ public class Client extends Thread
 		{
 			socket = new Socket("127.0.0.1", port);
 			out = new ObjectOutputStream(socket.getOutputStream());
-			in = new ObjectInputStream(socket.getInputStream());
-			// send call me		
+			in = new ObjectInputStream(socket.getInputStream());	
 			
 			this.start();
 		} 
@@ -46,6 +46,17 @@ public class Client extends Thread
 	@Override
 	public void run() 
 	{
+		// Send a message to the server to set the username
+		try 
+		{
+			out.writeObject(new CallMe(gui.getUsername()));
+			out.flush();
+		} 
+		catch (IOException e1) 
+		{
+			e1.printStackTrace();
+		}
+		
 		while(true)
 		{
 			try 
@@ -59,13 +70,6 @@ public class Client extends Thread
 					gui.getChatWindow().append(serverMessage.getFrom() + ": " + serverMessage.getBody() + "\n");
 				}
 				
-				// Send username to the server
-				else if (message.getType() == abstractMessage.MESSAGETYPE.CALLME) 
-				{
-					String userName = gui.getUsername();
-					//out.writeObject(new CallMeMessage(userName));
-				}
-				
 				// Booted by the server
 				else if (message.getType() == abstractMessage.MESSAGETYPE.DEAD)	
 				{
@@ -75,9 +79,6 @@ public class Client extends Thread
 				// Update the list of users
 				else if (message.getType() == abstractMessage.MESSAGETYPE.RESP) 
 				{
-					
-					StringBuilder builder = new StringBuilder();
-
 					RespMessage msg = (RespMessage) message;
 					System.out.println(msg.getPayload());
 					gui.getConnectWindow().removeAll();
@@ -101,7 +102,9 @@ public class Client extends Thread
 	 */
 	public void disconnect() throws IOException
 	{
-		// out.writeObject(new ByeMessage());
+		String msg = gui.getUsername() + " has disconnected from the server";
+		out.writeObject(new CchatMessage("0", msg));
+		out.flush();
 
 		JOptionPane.showMessageDialog(null, "You disconnected from the server");
 		System.exit(0);

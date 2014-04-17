@@ -182,6 +182,7 @@ public class chatGUI extends JFrame implements ActionListener{
 			JOptionPane.showMessageDialog(this,"Port Not Selected.  Quitting");
 			System.exit(0);
 		}
+		this.setTitle(userName);
 	}
 
 
@@ -359,7 +360,8 @@ public class chatGUI extends JFrame implements ActionListener{
 		}
 
 		//connect as a client
-		else if(e.getSource() == clientConnect){
+		else if(e.getSource() == clientConnect)
+		{
 			client = new Client(clientPort, this);
 		}
 
@@ -379,8 +381,7 @@ public class chatGUI extends JFrame implements ActionListener{
 		else if(e.getSource() == clientSend)
 		{
 			String message = clientMessageArea.getText();
-			//chatArea.append(message + "\n");
-
+		
 			try 
 			{
 				client.send(message);
