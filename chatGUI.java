@@ -1,13 +1,3 @@
-import java.awt.*;
-
-import javax.swing.*;
-import javax.swing.border.*;
-
-import java.awt.event.*;
-import java.io.IOException;
-import java.util.Random;
-
-
 /**************************
  * 
  * @author Ryan Szymkiewicz
@@ -18,6 +8,13 @@ import java.util.Random;
  *  that can be selected when the program is started.
  *
  */
+import java.awt.*;
+import javax.swing.*;
+import javax.swing.border.*;
+import java.awt.event.*;
+import java.io.IOException;
+import java.util.Random;
+
 @SuppressWarnings("serial")
 public class chatGUI extends JFrame implements ActionListener{
 
@@ -43,14 +40,11 @@ public class chatGUI extends JFrame implements ActionListener{
 	private JTextArea chatArea;
 	private JScrollPane chatAreaScroll;
 	private JPanel connectionPanel;
-	private String privateMessagePeople=null;
-	private String privateMessageContent=null;
+	private String privateMessagePeople;
+	private String privateMessageContent;
 	private Client client;
 	private ServerHandle server;
 	private int clientPort;
-	private String clientPortString;
-
-
 
 	/*******************
 	 * The chatGUI method is used when starting the program.  
@@ -384,7 +378,7 @@ public class chatGUI extends JFrame implements ActionListener{
 		
 			try 
 			{
-				client.send(message);
+				client.send("0", message);
 				clientMessageArea.setText("");	// Clears out old text
 			} 
 			catch (IOException e1)
@@ -420,8 +414,7 @@ public class chatGUI extends JFrame implements ActionListener{
 			privateMessagePanel.add(messageLabel);
 			privateMessagePanel.add(message);
 
-			int check =
-					JOptionPane.showConfirmDialog(
+			int check = JOptionPane.showConfirmDialog(
 							null,
 							privateMessagePanel,
 							"Enter your message and recipients",
@@ -429,6 +422,11 @@ public class chatGUI extends JFrame implements ActionListener{
 			if(check == JOptionPane.OK_OPTION){
 				privateMessagePeople=people.getText();
 				privateMessageContent=message.getText();
+				
+				privateMessagePeople += " " + userName; // Add so sender can also see message
+				
+				try { client.send(privateMessagePeople, privateMessageContent); } 
+				catch (IOException e1) { e1.printStackTrace(); }
 			}
 		}
 		else{

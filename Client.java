@@ -8,7 +8,6 @@
  * ------------------------------------------------------------------------*/
 import java.io.*;
 import java.net.*;
-
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 
@@ -52,11 +51,9 @@ public class Client extends Thread
 			out.writeObject(new CallMe(gui.getUsername()));
 			out.flush();
 		} 
-		catch (IOException e1) 
-		{
-			e1.printStackTrace();
-		}
+		catch (IOException e1) { e1.printStackTrace(); }
 		
+		// Read messages from the server
 		while(true)
 		{
 			try 
@@ -86,7 +83,6 @@ public class Client extends Thread
 					gui.validate();
 					gui.repaint();
 				}
-				
 			} 
 			catch (ClassNotFoundException | IOException e) 
 			{
@@ -102,8 +98,7 @@ public class Client extends Thread
 	 */
 	public void disconnect() throws IOException
 	{
-		String msg = gui.getUsername() + " has disconnected from the server";
-		out.writeObject(new CchatMessage("0", msg));
+		out.writeObject(new CchatMessage("0", " disconnected from the server"));
 		out.flush();
 
 		JOptionPane.showMessageDialog(null, "You disconnected from the server");
@@ -116,19 +111,8 @@ public class Client extends Thread
 	 * @param message 
 	 * @throws IOException 
 	 */
-	public void send(String msg) throws IOException
+	public void send(String to, String body) throws IOException
 	{
-		String to = "0";
-		String body = null;
-		
-		if (gui.getPrivateMessagePoeple() != null)
-		{
-			to = gui.getPrivateMessagePoeple();
-			body = gui.getPrivateMessageContents();
-		}
-		else
-			body = msg;
-			
 		out.writeObject(new CchatMessage(to,body));
 		out.flush();
 	}

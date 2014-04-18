@@ -9,7 +9,6 @@ import java.net.SocketTimeoutException;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-
 public class ServerHandle extends Thread{
 	
 	private ServerSocket serverSocket = null;
@@ -95,9 +94,7 @@ public class ServerHandle extends Thread{
 				out = new ObjectOutputStream( clientSocket.getOutputStream());
 				in = new ObjectInputStream( clientSocket.getInputStream());
 				
-				
-				
-				
+				// Get user selected username 
 				abstractMessage message = (abstractMessage) in.readObject();
 				CallMe msg = (CallMe) message;
 				
@@ -167,14 +164,37 @@ public class ServerHandle extends Thread{
 			}
 		}
 		
-		private void sendMessagesToWorker(CchatMessage MSG){
-			if(MSG.getTo().equals("0")){
-				//to everyone
+		private void sendMessagesToWorker(CchatMessage MSG)
+		{
+			
+			// Send message to everyone
+			if(MSG.getTo().equals("0"))
+			{
 				for(clientThread e : clientThreads){
 					System.out.println("Sending <<" + MSG.getBody() + ">> to <<" + e.getUserName() + ">>");
 					worker.JobQueue.add(new Job(new SchatMessage(this.getUserName(),MSG.getBody()),
 							e.getUserName()));
 				}//for each
+			}
+			
+			// Send messaged to specified users
+			else
+			{
+				// Split the string into usernames
+				String to[] = MSG.getTo().split("\\s+");
+				
+				for(clientThread e : clientThreads)
+				{
+					// Check to see if current username is one of the specified ones 
+					for (int i=0; i<to.length; i++)
+					{
+						if (to[i].equals(e.getUserName()))
+						{
+							System.out.println("Sending <<" + MSG.getBody() + ">> to <<" + e.getUserName() + ">>");
+							worker.JobQueue.add(new Job(new SchatMessage(this.getUserName(),MSG.getBody()), e.getUserName()));
+						}
+					}
+				}
 			}
 		}
 		
